@@ -4,8 +4,14 @@
   "description": "Simulates keypresses based on HID input",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "./node_modules/eslint/bin/eslint.js --fix index.js ./src/"
   },
   "author": "Daniel McQuiston <daniel.pro@dehugo.net>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "eslint": "^3.12.2",
+    "node-hid": "^0.5.2",
+    "robotjs": "^0.4.5"
+  }
 }

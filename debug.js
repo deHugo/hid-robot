@@ -2,7 +2,7 @@
 
 const HID = require("node-hid");
 const robot = require("robotjs");
-const controller = require("./src/lib/vpedal");
+const controller = require("./src/lib/infinity-pedal");
 const events = require("./src/lib/events");
 
 const hid = new HID.HID(controller.VENDOR_ID, controller.PRODUCT_ID);
@@ -16,7 +16,8 @@ hid.gotData = function (err, data) {
 		process.exit();
 	}
 	let parsedData = controller.parseData(data);
-	console.log(parsedData)
+	console.log(parsedData);
+	// console.log(data)
 
 	this.read(this.gotData.bind(this));
 };

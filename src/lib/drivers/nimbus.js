@@ -1,157 +1,56 @@
+function nimbusInput (label, type, number, byteIndex, defaultValue, valueRange, dataType) {
+	return {
+		label,
+		type,
+		number,
+		byteIndex,
+		defaultValue,
+		valueRange,
+		dataType
+	};
+}
+
+function nimbusAnalogInput (label, type, number, byteIndex) {
+	return nimbusInput(label, type, number, byteIndex, 0, [0, 255], 'uint8');
+}
+
+function nimbusAnalogStickAxis (label, type, number, byteIndex) {
+	return nimbusInput(label, type, number, byteIndex, 0, [-127, 127], 'int8');
+}
+
+function nimbusAnalogStickAxisX (label, number, byteIndex) {
+	return nimbusAnalogStickAxis(label, 'Stick X-Axis', number, byteIndex);
+}
+function nimbusAnalogStickAxisY (label, number, byteIndex) {
+	return nimbusAnalogStickAxis(label, 'Stick Y-Axis', number, byteIndex);
+}
+
+function nimbusAnalogButton (label, number, byteIndex) {
+	return nimbusAnalogInput(label, 'Button', number, byteIndex);
+}
+
+function nimbusAnalogDpad (label, number, byteIndex) {
+	return nimbusAnalogInput(label, 'D-Pad', number, byteIndex);
+}
+
 const KEYS = {
-	D_PAD_1_UP: {
-		label: "D-Pad Up",
-		type: "D-Pad",
-		number: 0,
-		byteIndex: 0,
-		defaultValue: 0,
-		valueRange: [0, 255],
-		dataType: "uint8"
-	},
-	D_PAD_1_RIGHT: {
-		label: "D-Pad Right",
-		type: "D-Pad",
-		number: 1,
-		byteIndex: 1,
-		defaultValue: 0,
-		valueRange: [0, 255],
-		dataType: "uint8"
-	},
-	D_PAD_1_DOWN: {
-		label: "D-Pad Down",
-		type: "D-Pad",
-		number: 2,
-		byteIndex: 2,
-		defaultValue: 0,
-		valueRange: [0, 255],
-		dataType: "uint8"
-	},
-	D_PAD_1_LEFT: {
-		label: "D-Pad Left",
-		type: "D-Pad",
-		number: 3,
-		byteIndex: 3,
-		defaultValue: 0,
-		valueRange: [0, 255],
-		dataType: "uint8"
-	},
-	BUTTON_1_A: {
-		label: "A",
-		type: "Button",
-		number: 0,
-		byteIndex: 4,
-		defaultValue: 0,
-		valueRange: [0, 255],
-		dataType: "uint8"
-	},
-	BUTTON_2_B: {
-		label: "B",
-		type: "Button",
-		number: 1,
-		byteIndex: 5,
-		defaultValue: 0,
-		valueRange: [0, 255],
-		dataType: "uint8"
-	},
-	BUTTON_3_X: {
-		label: "X",
-		type: "Button",
-		number: 2,
-		byteIndex: 6,
-		defaultValue: 0,
-		valueRange: [0, 255],
-		dataType: "uint8"
-	},
-	BUTTON_4_Y: {
-		label: "Y",
-		type: "Button",
-		number: 3,
-		byteIndex: 7,
-		defaultValue: 0,
-		valueRange: [0, 255],
-		dataType: "uint8"
-	},
-	BUTTON_5_L1: {
-		label: "L1",
-		type: "Button",
-		number: 4,
-		byteIndex: 8,
-		defaultValue: 0,
-		valueRange: [0, 255],
-		dataType: "uint8"
-	},
-	BUTTON_6_R1: {
-		label: "R1",
-		type: "Button",
-		number: 5,
-		byteIndex: 9,
-		defaultValue: 0,
-		valueRange: [0, 255],
-		dataType: "uint8"
-	},
-	BUTTON_7_L2: {
-		label: "L2",
-		type: "Button",
-		number: 6,
-		byteIndex: 10,
-		defaultValue: 0,
-		valueRange: [0, 255],
-		dataType: "uint8"
-	},
-	BUTTON_8_R2: {
-		label: "R2",
-		type: "Button",
-		number: 7,
-		byteIndex: 11,
-		defaultValue: 0,
-		valueRange: [0, 255],
-		dataType: "uint8"
-	},
-	BUTTON_9_MENU: {
-		label: "Menu",
-		type: "Button",
-		number: 8,
-		byteIndex: 12,
-		defaultValue: 0,
-		valueRange: [0, 1],
-		dataType: "uint8"
-	},
-	STICK_1_AXIS_X: {
-		label: "Left Stick X-Axis",
-		type: "Stick X-Axis",
-		number: 0,
-		byteIndex: 13,
-		defaultValue: 0,
-		valueRange: [-127, 127],
-		dataType: "int8"
-	},
-	STICK_1_AXIS_Y: {
-		label: "Left Stick Y-Axis",
-		type: "Stick Y-Axis",
-		number: 0,
-		byteIndex: 14,
-		defaultValue: 0,
-		valueRange: [-127, 127],
-		dataType: "int8"
-	},
-	STICK_2_AXIS_X: {
-		label: "Right Stick X-Axis",
-		type: "Stick X-Axis",
-		number: 1,
-		byteIndex: 15,
-		defaultValue: 0,
-		valueRange: [-127, 127],
-		dataType: "int8"
-	},
-	STICK_2_AXIS_Y: {
-		label: "Right Stick Y-Axis",
-		type: "Stick Y-Axis",
-		number: 1,
-		byteIndex: 16,
-		defaultValue: 0,
-		valueRange: [-127, 127],
-		dataType: "int8"
-	}
+	D_PAD_1_UP: nimbusAnalogDpad('D-Pad Up', 0, 0),
+	D_PAD_1_RIGHT: nimbusAnalogDpad('D-Pad Right', 1, 1),
+	D_PAD_1_DOWN: nimbusAnalogDpad('D-Pad Down', 2, 2),
+	D_PAD_1_LEFT: nimbusAnalogDpad('D-Pad Left', 3, 3),
+	BUTTON_1_A: nimbusAnalogButton('A', 0, 4),
+	BUTTON_2_B: nimbusAnalogButton('B', 1, 5),
+	BUTTON_3_X: nimbusAnalogButton('X', 2, 6),
+	BUTTON_4_Y: nimbusAnalogButton('Y', 3, 7),
+	BUTTON_5_L1: nimbusAnalogButton('L1', 4, 8),
+	BUTTON_6_R1: nimbusAnalogButton('R1', 5, 9),
+	BUTTON_7_L2: nimbusAnalogButton('L2', 6, 10),
+	BUTTON_8_R2: nimbusAnalogButton('R2', 7, 11),
+	BUTTON_9_MENU: nimbusInput ('Menu', 'Button', 8, 12, 0, [0,1], 'uint8'),
+	STICK_1_AXIS_X: nimbusAnalogStickAxisX('Left Stick X-Axis', 0, 13),
+	STICK_1_AXIS_Y: nimbusAnalogStickAxisY('Left Stick Y-Axis', 0, 14),
+	STICK_2_AXIS_X: nimbusAnalogStickAxisX('Right Stick X-Axis', 1, 15),
+	STICK_2_AXIS_Y: nimbusAnalogStickAxisY('Right Stick Y-Axis', 1, 16)
 };
 
 const NIMBUS = {

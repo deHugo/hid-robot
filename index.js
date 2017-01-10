@@ -2,7 +2,7 @@
 
 const HID = require("node-hid");
 const robot = require("robotjs");
-const controller = require("./src/lib/nimbus");
+const controller = require("./src/lib/drivers/nimbus");
 const events = require("./src/lib/events");
 
 const hid = new HID.HID(controller.VENDOR_ID, controller.PRODUCT_ID);

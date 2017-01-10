@@ -30,6 +30,7 @@ const KEYS = {
 const VPEDAL = {
 	VENDOR_ID: 0x05f3,
 	PRODUCT_ID: 0x00ff,
+	PRODUCT_NAME: "Infinity Pedal",
 	KEYS: KEYS,
 	parseData: buf => {
 		let parsed = {};

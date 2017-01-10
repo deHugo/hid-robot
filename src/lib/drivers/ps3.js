@@ -181,7 +181,9 @@ const KEYS = {
 
 const PS3 = {
 	VENDOR_ID: 1356,
+	VENDOR_NAME: "Sony",
 	PRODUCT_ID: 616,
+	PRODUCT_NAME: "PS3 Sixaxis Controller",
 	KEYS: KEYS,
 	parseData: buf => {
 		let parsed = {};

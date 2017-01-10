@@ -68,22 +68,18 @@ function translateAnalogSticksToPercentages (nameAxisX,nameAxisY, data) {
 	let xMin = controller.KEYS[nameAxisX].valueRange[0];
 	let xMax = controller.KEYS[nameAxisX].valueRange[1];
 	let screenX = translateValue(stickX, xMin, xMax, 0, screenSize.width);
-	// console.log('stick x: %d; screen x: %d', stickX, screenX)
 
 	let stickY = data[nameAxisY].analog;
 	let yMin = controller.KEYS[nameAxisY].valueRange[0];
 	let yMax = controller.KEYS[nameAxisY].valueRange[1];
 	let screenY = translateValue(stickY, yMin, yMax, screenSize.height, 0);
-	// console.log('stick y: %d; screen y: %d', stickY, screenY)
 
 	return {x: screenX, y: screenY};
 }
 
 function bindMousePos (pos) {
-	// return pos => {
 	let screenSize = robot.getScreenSize();
 	let center = {x:screenSize.width/2,y:screenSize.height/2};
-	// }
 }
 
 for (let button in map) {

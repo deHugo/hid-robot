@@ -1,9 +1,7 @@
 "use strict";
 
 const HID = require("node-hid");
-const robot = require("robotjs");
 const drivers = require("./src/lib/drivers");
-const events = require("./src/lib/events");
 
 for (let driverName in drivers) {
 	const driver = drivers[driverName];
@@ -22,14 +20,14 @@ for (let driverName in drivers) {
 				gotDataErr = err;
 			} else if (!data) {
 				console.log(`Device '${devName}' disconnected.`);
-				gotDataErr = 'Device disconnected';
+				gotDataErr = "Device disconnected";
 			}
 
 			if (driver.parseData) {
 				let parsedData = driver.parseData(data);
 				console.log(parsedData);
 			} else {
-				console.log(data)
+				console.log(data);
 			}
 
 			if (gotDataErr) {

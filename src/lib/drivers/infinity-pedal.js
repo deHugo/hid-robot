@@ -29,6 +29,7 @@ const KEYS = {
 
 const VPEDAL = {
 	VENDOR_ID: 0x05f3,
+	VENDOR_NAME: "PI Engineering, Inc",
 	PRODUCT_ID: 0x00ff,
 	PRODUCT_NAME: "Infinity Pedal",
 	KEYS: KEYS,

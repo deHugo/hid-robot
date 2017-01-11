@@ -29,6 +29,7 @@ const KEYS = {
 
 const VPEDAL = {
 	VENDOR_ID: 0x04b4,
+	VENDOR_NAME: "Cypress Semiconductor",
 	PRODUCT_ID: 0x5555,
 	PRODUCT_NAME: "V-Pedal",
 	KEYS: KEYS,

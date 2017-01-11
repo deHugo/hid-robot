@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "./node_modules/eslint/bin/eslint.js --fix index.js ./src/"
+    "lint": "./node_modules/.bin/eslint --fix index.js debug.js ./src/",
+    "debug": "node ./debug.js"
   },
   "author": "Daniel McQuiston <daniel.pro@dehugo.net>",
   "license": "MIT",

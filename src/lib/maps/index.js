@@ -1,3 +1,3 @@
 module.exports = {
-	nimbus: require('./nimbus')
-}
+	nimbus: require("./nimbus")
+};

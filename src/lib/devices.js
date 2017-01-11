@@ -44,16 +44,14 @@ function listen (driver) {
 
 			device.gotData = function (err, data) {
 				if (err) {
-					reject(err);
 					gotDataErr = err;
-				} else if (!data) {
 					emitter.emit("disconnect",`Device '${devName}' disconnected.`);
-					gotDataErr = "Device disconnected";
+					reject(err);
+				} else {
+					let parsedData = driver.parseData(data);
+
+					emitter.emit("data", parsedData);
 				}
-
-				let parsedData = driver.parseData(data);
-
-				emitter.emit("data", parsedData);
 
 				if (gotDataErr) {
 					this.pause();

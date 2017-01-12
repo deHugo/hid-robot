@@ -8,8 +8,6 @@ let devices = {};
 let deviceStates = {};
 
 for (let driverName in drivers) {
-	const driver = drivers[driverName];
-
 	devices[driverName] = {
 		getInputs: getInputs.bind(getInputs, driverName),
 		listen: listen.bind(listen, driverName),
@@ -48,11 +46,11 @@ function listen (driverName) {
 				let parsedData = driver.parseData(rawData);
 
 				emitter.emit("data", parsedData);
-				let deviceStateHolder = deviceStates[driverName]
-				emitIndividualDeviceInputEvents(parsedData, deviceStateHolder, emitter)
+				let deviceStateHolder = deviceStates[driverName];
+				emitIndividualDeviceInputEvents(parsedData, deviceStateHolder, emitter);
 			});
 
-			device.on("error", err => {
+			device.on("error", () => {
 				emitter.emit("disconnect",`Device '${devName}' disconnected.`);
 
 				device.close();
@@ -80,16 +78,16 @@ function storeInitialDeviceState (driverName) {
 
 function emitIndividualDeviceInputEvents (parsedData, deviceStateHolder, emitter) {
 	for (let inputName in parsedData) {
-		let inputEvent = parsedData[inputName]
+		let inputEvent = parsedData[inputName];
 		if (inputEvent.digital != deviceStateHolder.keys[inputName]) {
 			if (inputEvent.digital) {
-				emitter.emit(`up.${inputName}`, inputEvent)
+				emitter.emit(`up.${inputName}`, inputEvent);
 			} else {
-				emitter.emit(`down.${inputName}`, inputEvent)
+				emitter.emit(`down.${inputName}`, inputEvent);
 			}
-			emitter.emit(inputName, inputEvent)
+			emitter.emit(inputName, inputEvent);
 
-			deviceStateHolder.keys[inputName] = inputEvent.digital
+			deviceStateHolder.keys[inputName] = inputEvent.digital;
 		}
 	}
 }

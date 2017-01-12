@@ -34,33 +34,23 @@ function listen (driver) {
 	const devName = driver.PRODUCT_NAME||driver.PRODUCT_ID;
 	const devVendor = driver.VENDOR_NAME||driver.VENDOR_ID;
 
-	let gotDataErr = null;
-
 	let emitter = new EventEmitter();
 
 	let output = new Promise((resolve, reject) => {
 		try {
 			const device = new HID.HID(driver.VENDOR_ID, driver.PRODUCT_ID);
 
-			device.gotData = function (err, data) {
-				if (err) {
-					gotDataErr = err;
-					emitter.emit("disconnect",`Device '${devName}' disconnected.`);
-					reject(err);
-				} else {
-					let parsedData = driver.parseData(data);
+			device.on("data", rawData => {
+				let parsedData = driver.parseData(rawData);
 
-					emitter.emit("data", parsedData);
-				}
+				emitter.emit("data", parsedData);
+			});
 
-				if (gotDataErr) {
-					this.pause();
-				} else {
-					this.read(this.gotData.bind(this));
-				}
-			};
+			device.on("error", err => {
+				emitter.emit("disconnect",`Device '${devName}' disconnected.`);
 
-			device.read(device.gotData.bind(device));
+				device.close();
+			});
 
 			resolve({emitter, message:`Device '${devName}' found and connected.`});
 		} catch (err) {

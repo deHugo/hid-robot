@@ -1,4 +1,4 @@
-const devices = require("./src/lib/devices");
+const devices = require("../src/lib/devices");
 
 console.log(devices.VPEDAL.getInputs());
 

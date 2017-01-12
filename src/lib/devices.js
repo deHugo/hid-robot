@@ -2,6 +2,7 @@
 
 const EventEmitter = require("events");
 const HID = require("node-hid");
+const robot = require("robotjs");
 const drivers = require("./drivers");
 
 let devices = {};
@@ -11,6 +12,7 @@ for (let driverName in drivers) {
 	devices[driverName] = {
 		getInputs: getInputs.bind(getInputs, driverName),
 		listen: listen.bind(listen, driverName),
+		map: map.bind(map, driverName),
 	};
 }
 
@@ -40,6 +42,7 @@ function listen (driverName) {
 	let output = new Promise((resolve, reject) => {
 		try {
 			const device = new HID.HID(driver.VENDOR_ID, driver.PRODUCT_ID);
+
 			storeInitialDeviceState(driverName);
 
 			device.on("data", rawData => {
@@ -54,8 +57,10 @@ function listen (driverName) {
 				emitter.emit("disconnect",`Device '${devName}' disconnected.`);
 
 				device.close();
+				delete devices[driverName].emitter;
 			});
 
+			devices[driverName].emitter = emitter;
 			resolve({emitter, message:`Device '${devName}' found and connected.`});
 		} catch (err) {
 			reject(`Device '${devName}' by '${devVendor}' not found.`);
@@ -90,6 +95,13 @@ function emitIndividualDeviceInputEvents (parsedData, deviceStateHolder, emitter
 			deviceStateHolder.keys[inputName] = inputEvent.digital;
 		}
 	}
+}
+
+function map (driverName, deviceInputName, keyboardKeyName) {
+	let emitter = devices[driverName].emitter;
+
+	emitter.on(`up.${deviceInputName}`, () => robot.keyToggle(keyboardKeyName, "up"));
+	emitter.on(`down.${deviceInputName}`, () => robot.keyToggle(keyboardKeyName, "down"));
 }
 
 module.exports = devices;

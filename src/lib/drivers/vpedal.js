@@ -13,17 +13,23 @@ const KEYS = {
 	BUTTON_REW: {
 		label: "Rewind",
 		type: "Button",
-		parseData: button(4, 0x01)
+		parseData: button(4, 0x01),
+		defaultValue: 0,
+		valueRange: [0,1]
 	},
 	BUTTON_FWD: {
 		label: "Fast Forward",
 		type: "Button",
-		parseData: button(4, 0x02)
+		parseData: button(4, 0x02),
+		defaultValue: 0,
+		valueRange: [0,1]
 	},
 	BUTTON_PLAY: {
 		label: "Play/Pause",
 		type: "Button",
-		parseData: button(4, 0x03)
+		parseData: button(4, 0x03),
+		defaultValue: 0,
+		valueRange: [0,1]
 	},
 };
 

@@ -19,7 +19,8 @@ devices.INFINITY_PEDAL.listen()
 		devices.INFINITY_PEDAL.map("BUTTON_REW", "a");
 		devices.INFINITY_PEDAL.map("BUTTON_PLAY", "s");
 		devices.INFINITY_PEDAL.map("BUTTON_FWD", "d");
-	});
+	})
+	.catch(err => console.error(err));
 
 devices.VPEDAL.listen()
 	.then(device => {

@@ -93,9 +93,9 @@ function emitIndividualDeviceInputEvents (parsedData, deviceStateHolder, emitter
 		let inputEvent = parsedData[inputName];
 		if (inputEvent.digital != deviceStateHolder.keys[inputName]) {
 			if (inputEvent.digital) {
-				emitter.emit(`up.${inputName}`, inputEvent);
-			} else {
 				emitter.emit(`down.${inputName}`, inputEvent);
+			} else {
+				emitter.emit(`up.${inputName}`, inputEvent);
 			}
 			emitter.emit(inputName, inputEvent);
 

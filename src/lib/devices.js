@@ -56,12 +56,19 @@ function listen (driverName) {
 			device.on("error", () => {
 				emitter.emit("disconnect",`Device '${devName}' disconnected.`);
 
-				device.close();
+				stop();
 				delete devices[driverName].emitter;
 			});
 
 			devices[driverName].emitter = emitter;
-			resolve({emitter, message:`Device '${devName}' found and connected.`});
+
+			function stop () {
+				device.removeAllListeners();
+				device.close();
+				emitter.removeAllListeners();
+			}
+
+			resolve({emitter, message:`Device '${devName}' found and connected.`, stop});
 		} catch (err) {
 			reject(`Device '${devName}' by '${devVendor}' not found.`);
 		}

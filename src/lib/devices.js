@@ -107,8 +107,10 @@ function emitIndividualDeviceInputEvents (parsedData, deviceStateHolder, emitter
 function map (driverName, deviceInputName, keyboardKeyName) {
 	let emitter = devices[driverName].emitter;
 
-	emitter.on(`up.${deviceInputName}`, () => robot.keyToggle(keyboardKeyName, "up"));
-	emitter.on(`down.${deviceInputName}`, () => robot.keyToggle(keyboardKeyName, "down"));
+	if (emitter) {
+		emitter.on(`up.${deviceInputName}`, () => robot.keyToggle(keyboardKeyName, "up"));
+		emitter.on(`down.${deviceInputName}`, () => robot.keyToggle(keyboardKeyName, "down"));
+	}
 }
 
 module.exports = devices;

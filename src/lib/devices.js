@@ -32,6 +32,16 @@ function getInputs (driverName) {
 	return inputs;
 }
 
+function stop (device, emitter) {
+	if (device) {
+		device.removeAllListeners();
+		device.close();
+	}
+	if (emitter) {
+		emitter.removeAllListeners();
+	}
+}
+
 function listen (driverName) {
 	const driver = drivers[driverName];
 	const devName = driver.PRODUCT_NAME||driver.PRODUCT_ID;
@@ -56,19 +66,22 @@ function listen (driverName) {
 			device.on("error", () => {
 				emitter.emit("disconnect",`Device '${devName}' disconnected.`);
 
-				stop();
+				stop(device, emitter);
 				delete devices[driverName].emitter;
 			});
 
 			devices[driverName].emitter = emitter;
 
-			function stop () {
-				device.removeAllListeners();
-				device.close();
-				emitter.removeAllListeners();
-			}
-
-			resolve({emitter, message:`Device '${devName}' found and connected.`, stop});
+			resolve({
+				emitter,
+				message: `Device '${devName}' found and connected.`,
+				stop: stop.bind(stop, device, emitter),
+				driverName,
+				productName: devName,
+				productId: driver.PRODUCT_ID,
+				vendorName: devVendor,
+				vendorId: driver.VENDOR_ID
+			});
 		} catch (err) {
 			reject(`Device '${devName}' by '${devVendor}' not found.`);
 		}

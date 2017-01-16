@@ -1,16 +1,23 @@
 const devices = require("../src/lib/devices");
 
-console.log(devices.VPEDAL.getInputs());
+// console.log(devices.VPEDAL.getInputs());
 
-devices.INFINITY_PEDAL.listen()
-	.then(logKeyPresses, logError)
-	.then(() => mapKeyPresses(devices.INFINITY_PEDAL))
-	.catch(logError);
+let connectedDevices = [];
+const compatibleDevices = [
+	devices.INFINITY_PEDAL,
+	devices.VPEDAL
+];
 
-devices.VPEDAL.listen()
-	.then(logKeyPresses, logError)
-	.then(() => mapKeyPresses(devices.VPEDAL))
-	.catch(logError);
+compatibleDevices.forEach(compatibleDevice => {
+	if (connectedDevices.indexOf(compatibleDevice) < 0) {
+		compatibleDevice.listen()
+			.then(device => { connectedDevices.push(device); return device; }, logError)
+			.then(logKeyPresses, () => {})
+			.then(() => mapKeyPresses(compatibleDevice), () => {})
+			.catch(logError);
+	}
+});
+
 
 function logKeyPresses (device) {
 	console.log(device.message);
@@ -28,7 +35,7 @@ function logKeyPresses (device) {
 }
 
 function logError (err) {
-	console.log(err)
+	console.log(err);
 }
 
 function mapKeyPresses (device) {
@@ -36,3 +43,7 @@ function mapKeyPresses (device) {
 	device.map("BUTTON_PLAY", "f4");
 	device.map("BUTTON_FWD", "f5");
 }
+
+setTimeout(() => {
+	connectedDevices.forEach(device => device.stop());
+}, 5000);

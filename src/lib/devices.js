@@ -13,6 +13,8 @@ for (let driverName in drivers) {
 		getInputs: getInputs.bind(getInputs, driverName),
 		listen: listen.bind(listen, driverName),
 		map: map.bind(map, driverName),
+		vendorId: drivers[driverName].VENDOR_ID,
+		productId: drivers[driverName].PRODUCT_ID,
 	};
 }
 

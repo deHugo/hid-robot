@@ -1,5 +1,15 @@
 "use strict";
 
+Set.prototype.difference = Set.prototype.difference||function(setB) {
+	let difference = new Set(this);
+
+	for (let elem of setB) {
+		difference.delete(elem);
+	}
+
+	return difference;
+};
+
 const HID = require("node-hid");
 const compatibleDevices = require("./devices");
 
@@ -10,9 +20,9 @@ const EVENTS = {
 	DEVICE_REMOVE: "device-remove"
 };
 
-let connectedDevices = new WeakSet();
-let addScanner
-let removeScanner
+let connectedDevices = new Set();
+let addScanner;
+let removeScanner;
 
 /**
  * From https://developer.chrome.com/apps/hid
@@ -40,25 +50,19 @@ function connectDevice (device) {
 	if (!connectedDevices.has(device)) {
 		connectedDevices.add(device);
 	}
-	if (removeScanner) {
-		clearInterval(removeScanner)
-	}
 }
 
 function disconnectDevice (device) {
 	if (connectedDevices.has(device)) {
 		connectedDevices.delete(device);
 	}
-	if (addScanner) {
-		clearInterval(addScanner)
-	}
 }
 
 function on (eventName, filter, callback) {
 	if (eventName === EVENTS.DEVICE_ADD) {
-		return onDeviceAdded.call(onDeviceAdded, filter, callback)
+		return onDeviceAdded.call(onDeviceAdded, filter, callback);
 	} else if (eventName === EVENTS.DEVICE_REMOVE) {
-		return onDeviceRemoved.call(onDeviceRemoved, filter, callback)
+		return onDeviceRemoved.call(onDeviceRemoved, filter, callback);
 	} else {
 		return false;
 	}
@@ -67,15 +71,13 @@ function on (eventName, filter, callback) {
 function onDeviceAdded (filter, callback) {
 	addScanner = setInterval(() => {
 		HID.devices().forEach(device => {
-			let match = false;
-
 			for (let compatibleDeviceName in compatibleDevices) {
 				let compatibleDevice = compatibleDevices[compatibleDeviceName];
-
-				match = device.vendorId === compatibleDevice.vendorId && device.productId === compatibleDevice.productId && !connectedDevices.has(compatibleDevice);
-				if (match) {
-					connectDevice(compatibleDevice);
-					callback(compatibleDevice);
+				if (device.vendorId === compatibleDevice.vendorId && device.productId === compatibleDevice.productId) {
+					if (!connectedDevices.has(compatibleDevice)) {
+						connectDevice(compatibleDevice);
+						callback(compatibleDevice);
+					}
 					break;
 				}
 			}
@@ -85,19 +87,38 @@ function onDeviceAdded (filter, callback) {
 
 function onDeviceRemoved (filter, callback) {
 	removeScanner = setInterval(() => {
-		HID.devices().forEach(device => {
+		let currentlyConnectedDevices = new Set(HID.devices().filter(device => {
 			let match = false;
 
 			for (let compatibleDeviceName in compatibleDevices) {
 				let compatibleDevice = compatibleDevices[compatibleDeviceName];
 
-				match = device.vendorId === compatibleDevice.vendorId && device.productId === compatibleDevice.productId && connectedDevices.has(compatibleDevice);
-				if (match) {
-					disconnectDevice(compatibleDevice);
-					callback(compatibleDevice);
+				if (device.vendorId === compatibleDevice.vendorId && device.productId === compatibleDevice.productId) {
+					match = true;
 					break;
 				}
 			}
+
+			return match;
+		}).map(device => {
+			let compatibleDevice;
+
+			for (let compatibleDeviceName in compatibleDevices) {
+				compatibleDevice = compatibleDevices[compatibleDeviceName];
+
+				if (device.vendorId === compatibleDevice.vendorId && device.productId === compatibleDevice.productId) {
+					break;
+				}
+			}
+
+			return compatibleDevice;
+		}));
+
+		let notConnectedDevices = connectedDevices.difference(currentlyConnectedDevices);
+
+		notConnectedDevices.forEach(notConnectedDevice => {
+			disconnectDevice(notConnectedDevice);
+			callback(notConnectedDevice);
 		});
 	}, SCAN_INTERVAL);
 }

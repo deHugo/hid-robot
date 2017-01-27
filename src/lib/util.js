@@ -26,7 +26,7 @@ let removeScanner;
 
 /**
  * From https://developer.chrome.com/apps/hid
- * Attempt to make this module match functionalied of the Chrome HID API
+ * Attempt to make this module match functionality of the Chrome HID API
  *
  * Types
  * 	HidDeviceInfo
@@ -45,6 +45,20 @@ let removeScanner;
  * 	onDeviceRemoved
  */
 
+function getCompatibleDevice (deviceFilter) {
+	let compatibleDevice = null;
+
+	for (let compatibleDeviceName in compatibleDevices) {
+		let device = compatibleDevices[compatibleDeviceName];
+
+		if (deviceFilter.vendorId === device.vendorId && deviceFilter.productId === device.productId) {
+			compatibleDevice = device;
+			break;
+		}
+	}
+
+	return compatibleDevice;
+}
 
 function connectDevice (device) {
 	if (!connectedDevices.has(device)) {
@@ -71,15 +85,14 @@ function on (eventName, filter, callback) {
 function onDeviceAdded (filter, callback) {
 	addScanner = setInterval(() => {
 		HID.devices().forEach(device => {
-			for (let compatibleDeviceName in compatibleDevices) {
-				let compatibleDevice = compatibleDevices[compatibleDeviceName];
-				if (device.vendorId === compatibleDevice.vendorId && device.productId === compatibleDevice.productId) {
-					if (!connectedDevices.has(compatibleDevice)) {
-						connectDevice(compatibleDevice);
-						callback(compatibleDevice);
-					}
-					break;
-				}
+			const deviceFilter = {
+				vendorId: device.vendorId,
+				productId: device.productId
+			};
+			const compatibleDevice = getCompatibleDevice(deviceFilter);
+			if (compatibleDevice && !connectedDevices.has(compatibleDevice)) {
+				connectDevice(compatibleDevice);
+				callback(compatibleDevice);
 			}
 		});
 	}, SCAN_INTERVAL);
@@ -88,30 +101,19 @@ function onDeviceAdded (filter, callback) {
 function onDeviceRemoved (filter, callback) {
 	removeScanner = setInterval(() => {
 		let currentlyConnectedDevices = new Set(HID.devices().filter(device => {
-			let match = false;
+			const deviceFilter = {
+				vendorId: device.vendorId,
+				productId: device.productId
+			};
 
-			for (let compatibleDeviceName in compatibleDevices) {
-				let compatibleDevice = compatibleDevices[compatibleDeviceName];
-
-				if (device.vendorId === compatibleDevice.vendorId && device.productId === compatibleDevice.productId) {
-					match = true;
-					break;
-				}
-			}
-
-			return match;
+			return Boolean(getCompatibleDevice(deviceFilter));
 		}).map(device => {
-			let compatibleDevice;
+			const deviceFilter = {
+				vendorId: device.vendorId,
+				productId: device.productId
+			};
 
-			for (let compatibleDeviceName in compatibleDevices) {
-				compatibleDevice = compatibleDevices[compatibleDeviceName];
-
-				if (device.vendorId === compatibleDevice.vendorId && device.productId === compatibleDevice.productId) {
-					break;
-				}
-			}
-
-			return compatibleDevice;
+			return getCompatibleDevice(deviceFilter);
 		}));
 
 		let notConnectedDevices = connectedDevices.difference(currentlyConnectedDevices);

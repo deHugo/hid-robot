@@ -8,6 +8,7 @@ const utils = require("./utils");
 
 let devices = {};
 let deviceStates = {};
+let hidDevices = {};
 
 for (let driverName in drivers) {
 	devices[driverName] = {
@@ -56,19 +57,16 @@ function listen (driverName) {
 
 			storeInitialDeviceState(driverName);
 
-			device.on("data", rawData => {
-				let parsedData = driver.parseData(rawData);
+			hidDevices[driverName] = device;
 
-				emitter.emit("data", parsedData);
-				let deviceStateHolder = deviceStates[driverName];
-				emitIndividualDeviceInputEvents(parsedData, deviceStateHolder, emitter);
-			});
+			device.on("data", onData.bind(onData, driver, driverName, emitter));
 
 			device.on("error", () => {
 				emitter.emit("disconnect",`Device '${devName}' disconnected.`);
 
 				stop(device, emitter);
 				delete devices[driverName].emitter;
+				delete hidDevices[driverName];
 			});
 
 			devices[driverName].emitter = emitter;
@@ -102,38 +100,59 @@ function storeInitialDeviceState (driverName) {
 	deviceStates[driverName] = state;
 }
 
-function emitIndividualDeviceInputEvents (parsedData, deviceStateHolder, emitter) {
+function parseDeviceEventData (parsedData, deviceStateHolder) {
+	let output = {};
+
 	for (let inputName in parsedData) {
 		let inputEvent = parsedData[inputName];
 		if (inputEvent.digital != deviceStateHolder.keys[inputName]) {
 			if (inputEvent.digital) {
-				emitter.emit(`down.${inputName}`, inputEvent);
+				output[`down.${inputName}`] = inputEvent;
 			} else {
-				emitter.emit(`up.${inputName}`, inputEvent);
+				output[`up.${inputName}`] = inputEvent;
 			}
-			emitter.emit(inputName, inputEvent);
+			output[inputName] = inputEvent;
 
 			deviceStateHolder.keys[inputName] = inputEvent.digital;
 		}
 	}
+
+	return output;
 }
 
-function map (driverName, deviceInputName, keyboardKeyName) {
-	let emitter = devices[driverName].emitter;
+let deviceMap = {};
 
-	if (emitter) {
-		emitter.on(`up.${deviceInputName}`, () => {
-			if (utils.getConfig().debug) {
-				console.log(`${utils.getFormattedUtcTime()} ${utils.rightPadSpaces(deviceInputName, 14)}     up`);
+function map (driverName, deviceInputName, keyboardKeyName) {
+	deviceMap[driverName] = deviceMap[driverName]||{};
+	deviceMap[driverName][deviceInputName] = keyboardKeyName;
+}
+
+function onData (driver, driverName, emitter, rawData) {
+	let parsedData = driver.parseData(rawData);
+
+	// BEGIN Deprecated. Remove by 1.0.0 release
+	emitter.emit("data", parsedData);
+	// END Deprecated
+
+	let deviceStateHolder = deviceStates[driverName];
+
+	let eventData = parseDeviceEventData(parsedData, deviceStateHolder);
+
+	if (deviceMap[driverName]) {
+		for (let deviceInputName in deviceMap[driverName]) {
+			let keyboardKeyName = deviceMap[driverName][deviceInputName];
+			if (eventData[`up.${deviceInputName}`]) {
+				if (utils.getConfig().debug) {
+					console.log(`${utils.getFormattedUtcTime()} ${utils.rightPadSpaces(deviceInputName, 14)}     up                 ${keyboardKeyName}`);
+				}
+				robot.keyToggle(keyboardKeyName, "up");
+			} else if (eventData[`down.${deviceInputName}`]) {
+				if (utils.getConfig().debug) {
+					console.log(`${utils.getFormattedUtcTime()} ${utils.rightPadSpaces(deviceInputName, 14)}           down         ${keyboardKeyName}`);
+				}
+				robot.keyToggle(keyboardKeyName, "down");
 			}
-			robot.keyToggle(keyboardKeyName, "up");
-		});
-		emitter.on(`down.${deviceInputName}`, () => {
-			if (utils.getConfig().debug) {
-				console.log(`${utils.getFormattedUtcTime()} ${utils.rightPadSpaces(deviceInputName, 14)}           down`);
-			}
-			robot.keyToggle(keyboardKeyName, "down");
-		});
+		}
 	}
 }
 

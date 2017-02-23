@@ -4,6 +4,7 @@ const EventEmitter = require("events");
 const HID = require("node-hid");
 const robot = require("robotjs");
 const drivers = require("./drivers");
+const utils = require("./utils");
 
 let devices = {};
 let deviceStates = {};
@@ -121,8 +122,18 @@ function map (driverName, deviceInputName, keyboardKeyName) {
 	let emitter = devices[driverName].emitter;
 
 	if (emitter) {
-		emitter.on(`up.${deviceInputName}`, () => robot.keyToggle(keyboardKeyName, "up"));
-		emitter.on(`down.${deviceInputName}`, () => robot.keyToggle(keyboardKeyName, "down"));
+		emitter.on(`up.${deviceInputName}`, () => {
+			if (utils.getConfig().debug) {
+				console.log(`${utils.getFormattedUtcTime()} ${utils.rightPadSpaces(deviceInputName, 14)}     up`);
+			}
+			robot.keyToggle(keyboardKeyName, "up");
+		});
+		emitter.on(`down.${deviceInputName}`, () => {
+			if (utils.getConfig().debug) {
+				console.log(`${utils.getFormattedUtcTime()} ${utils.rightPadSpaces(deviceInputName, 14)}           down`);
+			}
+			robot.keyToggle(keyboardKeyName, "down");
+		});
 	}
 }
 

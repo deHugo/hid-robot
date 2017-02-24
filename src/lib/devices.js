@@ -9,6 +9,7 @@ const utils = require("./utils");
 let devices = {};
 let deviceStates = {};
 let hidDevices = {};
+let deviceMap = {};
 
 for (let driverName in drivers) {
 	devices[driverName] = {
@@ -120,8 +121,6 @@ function parseDeviceEventData (parsedData, deviceStateHolder) {
 	return output;
 }
 
-let deviceMap = {};
-
 function map (driverName, deviceInputName, keyboardKeyName) {
 	deviceMap[driverName] = deviceMap[driverName]||{};
 	deviceMap[driverName][deviceInputName] = keyboardKeyName;
@@ -142,17 +141,19 @@ function onData (driver, driverName, emitter, rawData) {
 		for (let deviceInputName in deviceMap[driverName]) {
 			let keyboardKeyName = deviceMap[driverName][deviceInputName];
 			if (eventData[`up.${deviceInputName}`]) {
-				if (utils.getConfig().debug) {
-					console.log(`${utils.getFormattedUtcTime()} ${utils.rightPadSpaces(deviceInputName, 14)}     up                 ${keyboardKeyName}`);
-				}
+				logDataEvent('up', deviceInputName, keyboardKeyName);
 				robot.keyToggle(keyboardKeyName, "up");
 			} else if (eventData[`down.${deviceInputName}`]) {
-				if (utils.getConfig().debug) {
-					console.log(`${utils.getFormattedUtcTime()} ${utils.rightPadSpaces(deviceInputName, 14)}           down         ${keyboardKeyName}`);
-				}
+				logDataEvent('     down', deviceInputName, keyboardKeyName);
 				robot.keyToggle(keyboardKeyName, "down");
 			}
 		}
+	}
+}
+
+function logDataEvent (dir, deviceInputName, keyboardKeyName) {
+	if (utils.getConfig().debug) {
+		console.log(`${utils.getFormattedUtcTime()} ${utils.rightPadSpaces(deviceInputName, 15)}${utils.rightPadSpaces(dir, 15)}${keyboardKeyName}`);
 	}
 }
 

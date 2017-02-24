@@ -12,8 +12,10 @@
   "author": "Daniel McQuiston <daniel.pro@dehugo.net>",
   "license": "MIT",
   "dependencies": {
-    "eslint": "^3.12.2",
     "node-hid": "^0.5.4",
     "robotjs": "^0.4.5"
+  },
+  "devDependencies": {
+    "eslint": "^3.12.2"
   }
 }

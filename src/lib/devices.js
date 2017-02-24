@@ -5,6 +5,7 @@ const HID = require("node-hid");
 const robot = require("robotjs");
 const drivers = require("./drivers");
 const utils = require("./utils");
+const ListeningDevice = require("./ListeningDevice.js");
 
 let devices = {};
 let deviceStates = {};
@@ -35,16 +36,6 @@ function getInputs (driverName) {
 	return inputs;
 }
 
-function stop (device, emitter) {
-	if (device) {
-		device.removeAllListeners();
-		device.close();
-	}
-	if (emitter) {
-		emitter.removeAllListeners();
-	}
-}
-
 function listen (driverName) {
 	const driver = drivers[driverName];
 	const devName = driver.PRODUCT_NAME||driver.PRODUCT_ID;
@@ -54,34 +45,23 @@ function listen (driverName) {
 
 	let output = new Promise((resolve, reject) => {
 		try {
-			const device = new HID.HID(driver.VENDOR_ID, driver.PRODUCT_ID);
+			const hidListener = new HID.HID(driver.VENDOR_ID, driver.PRODUCT_ID);
+			const listeningDevice = new ListeningDevice(hidListener, driverName, emitter);
 
 			storeInitialDeviceState(driverName);
+			hidDevices[driverName] = hidListener;
+			devices[driverName].emitter = emitter;
 
-			hidDevices[driverName] = device;
-
-			device.on("data", onData.bind(onData, driver, driverName, emitter));
-
-			device.on("error", () => {
+			hidListener.on("data", onData.bind(onData, driver, driverName, emitter));
+			hidListener.on("error", () => {
 				emitter.emit("disconnect",`Device '${devName}' disconnected.`);
 
-				stop(device, emitter);
+				listeningDevice.stop();
 				delete devices[driverName].emitter;
 				delete hidDevices[driverName];
 			});
 
-			devices[driverName].emitter = emitter;
-
-			resolve({
-				emitter,
-				message: `Device '${devName}' found and connected.`,
-				stop: stop.bind(stop, device, emitter),
-				driverName,
-				productName: devName,
-				productId: driver.PRODUCT_ID,
-				vendorName: devVendor,
-				vendorId: driver.VENDOR_ID
-			});
+			resolve(listeningDevice);
 		} catch (err) {
 			reject(`Device '${devName}' by '${devVendor}' not found.`);
 		}
@@ -141,10 +121,10 @@ function onData (driver, driverName, emitter, rawData) {
 		for (let deviceInputName in deviceMap[driverName]) {
 			let keyboardKeyName = deviceMap[driverName][deviceInputName];
 			if (eventData[`up.${deviceInputName}`]) {
-				logDataEvent('up', deviceInputName, keyboardKeyName);
+				logDataEvent("up", deviceInputName, keyboardKeyName);
 				robot.keyToggle(keyboardKeyName, "up");
 			} else if (eventData[`down.${deviceInputName}`]) {
-				logDataEvent('     down', deviceInputName, keyboardKeyName);
+				logDataEvent("     down", deviceInputName, keyboardKeyName);
 				robot.keyToggle(keyboardKeyName, "down");
 			}
 		}

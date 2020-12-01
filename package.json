@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "./node_modules/.bin/eslint --fix index.js ./debug/ ./src/",
+    "lint": "eslint --fix index.js ./debug/ ./src/",
     "debug": "node ./debug/devices.js",
     "debug-one": "node ./debug/oneDevice.js"
   },
@@ -13,10 +13,10 @@
   "license": "MIT",
   "dependencies": {
     "node-hid": "^0.5.4",
-    "robotjs": "^0.4.5"
+    "robotjs": "^0.6.0"
   },
   "devDependencies": {
-    "eslint": "^3.12.2"
+    "eslint": "^7.14.0"
   },
   "repository": {
     "type": "git",
